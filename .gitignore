@@ -208,7 +208,6 @@ Temporary Items
 
 ################################################################################
 # Personal
-
 build*/
 *.xc*
 *.DS_Store
@@ -240,6 +239,7 @@ notes.md
 logs
 results*.csv
 results*.xlsx
+results*.txt
 \~\$*
 input.txt
 paper
@@ -249,3 +249,5 @@ paper
 erleben.blend
 *.geo
 input/oldTetMeshes
+
+scripts/out/

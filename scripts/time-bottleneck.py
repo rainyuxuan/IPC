@@ -3,7 +3,15 @@ import numpy as np
 import re
 import math
 
-INPUT_SAMPLE = 'torus-torus-torus_fallNoShift_NH_BE_interiorPoint_20220928204810t12'
+INPUT_SAMPLES = {
+    'chain5': 'torus-torus-torus_fallNoShift_NH_BE_interiorPoint_20221004145812t12',
+    'chain10': 'torus-torus-torus_fallNoShift_NH_BE_interiorPoint_20221004145906t12',
+    'chain35': 'torus-torus-torus_fallNoShift_NH_BE_interiorPoint_20221003103857t12',
+    'chain100': 'torus-torus-torus_fallNoShift_NH_BE_interiorPoint_20221003232744t12',
+    'tightFitCube1': 'ANSYS1e-3Corner_coarse_fixLowerHalf_NH_BE_interiorPoint_20221004004035t1',
+    'tightFitCube8': 'ANSYS1e-3Corner_coarse_fixLowerHalf_NH_BE_interiorPoint_20221004003915t8',
+    'tightFitCube12': 'ANSYS1e-3Corner_coarse_fixLowerHalf_NH_BE_interiorPoint_20221003234942t12',
+}
 
 
 def _flatten(arr):
@@ -31,6 +39,10 @@ def output_path(fname: str):
 def read_file(filepath: str):
     with open(filepath) as f:
         lines = f.readlines()
+        # Metadata
+        # 0:
+        # 1: num_timesteps, num_inner_iterations,
+        # 2:
         metadata = lines.pop(0), lines.pop(0), lines.pop(0)
 
         activities = []
@@ -73,11 +85,11 @@ def read_file(filepath: str):
         return metadata, activities, times, stat_data
 
 
-def plot_bars(activities, times):
+def plot_bars(input_name, activities, times):
     num_rows = len(activities) // 2
     num_cols = math.ceil(len(activities) // num_rows)
     fig, axs = plt.subplots(num_rows, num_cols)
-    fig.suptitle(f'Bar Graphs for {INPUT_SAMPLE}')
+    fig.suptitle(f'Bar Graphs for {input_name}')
 
     for i in range(len(activities)):
         y_pos = np.arange(len(activities[i]))
@@ -91,10 +103,8 @@ def plot_bars(activities, times):
         subplot.set_xlabel('Time (s)')
         subplot.set_title(f'Group {i}')
 
-    plt.show()
 
-
-def plot_bars_all(act2time_tuples):
+def plot_bars_all(input_name, act2time_tuples):
     values = [t for a, t in act2time_tuples]
     labels = [a for a, t in act2time_tuples]
 
@@ -111,15 +121,14 @@ def plot_bars_all(act2time_tuples):
                  padding=8, color='b')
 
     ax.set_xlabel('Time (s)')
-    ax.set_title(f'Bar Graph for {INPUT_SAMPLE}')
-    plt.show()
+    ax.set_title(f'Bar Graph for {input_name}')
 
 
-def plot_pies(activities, times):
+def plot_pies(input_name, activities, times):
     num_rows = len(activities) // 2
     num_cols = math.ceil(len(activities) // num_rows)
     fig, axs = plt.subplots(num_rows, num_cols)
-    fig.suptitle(f'Pie Graphs for {INPUT_SAMPLE}')
+    fig.suptitle(f'Pie Graphs for {input_name}')
 
     for i in range(len(activities)):
         act_list = list(zip(activities[i], times[i]))
@@ -132,30 +141,114 @@ def plot_pies(activities, times):
         subplot.pie(values, labels=labels, autopct='%.2f%%', radius=1)
         subplot.set_title(f'Group {i}')
 
-    plt.show()
 
+def plot_pies_all(input_name, act2time_tuples):
+    """Plot pie graphs for one sample.
 
-def plot_pies_all(act2time_tuples):
+    :param input_name:
+    :param act2time_tuples:
+    :return:
+    """
     values = [t for a, t in act2time_tuples if t > 0]
     labels = [a for a, t in act2time_tuples if t > 0]
 
     fig, ax = plt.subplots()
     ax.pie(values, labels=labels, autopct='%.2f%%', radius=1)
-    ax.set_title(f'Pie Graph for {INPUT_SAMPLE}')
-    plt.show()
+    ax.set_title(f'Pie Graph for {input_name}')
+
+
+def plot_lines(activities_lst, times_lst):
+    """Plot line graphs for all samples.
+
+    :param activities_lst:
+    :param times_lst:
+    :return:
+    """
+    samples = times_lst.keys()
+    sample_nums = []
+    for k in samples:
+        sample_nums.append(int(k.replace('chain', '')))
+
+    # Total time
+    fig_total, axs_total = plt.subplots(2)
+    fig_total.suptitle('Total Running Time Plots')
+
+    total_times = {}
+    for name, times in times_lst.items():
+        total_times[name] = times.sum()
+
+    axs_total[0].set_title('Total Time vs Input Name')
+    axs_total[0].plot(samples, total_times.values())
+    axs_total[1].set_title('Total Time vs Number of Chains')
+    axs_total[1].plot(sample_nums, total_times.values())
+
+    # Time of each activity
+
+    flatten_labels = list(activities_lst.values())[0]
+    target_labels = ['descent',
+                     'numericalFactorization',
+                     'lineSearch_other',
+                     'CCD',
+                     'computeConstraintSets',
+                     'looping EE CCS']
+
+    # label_indices = {}
+    # for label in target_labels:
+    #     label_indices[label] = list(flatten_labels).index(label)
+
+    sample2label2time = {}
+    for sample in samples:
+        sample2label2time[sample] = {}
+        sample_acts = list(activities_lst[sample])
+        for label in target_labels:
+            idx = list(sample_acts).index(label)
+            sample2label2time[sample][label] = times_lst[sample][idx]
+
+    fig_acts, axs_acts = plt.subplots(len(target_labels))
+    fig_acts.suptitle('Activity Running TIme Plots')
+
+    for i in range(len(target_labels)):
+        label_times = []
+        label = target_labels[i]
+        # for times in times_lst.values():
+        #     label_times.append(times[label_indices[label]])
+        for sample in samples:
+            label_times.append(sample2label2time[sample][label])
+
+        axs_acts[i].set_title(f'Time for {label} vs Number of Chains')
+        axs_acts[i].plot(sample_nums, label_times)
 
 
 if __name__ == "__main__":
-    metadata, activities, times, stat_data = read_file(
-        filepath(f'output/{INPUT_SAMPLE}/info.txt'))
+    metadata_lst, activities_lst, times_lst, stat_data_lst = {}, {}, {}, {}
+    # Plot each sample
+    for sample_name, sample_file in INPUT_SAMPLES.items():
+        metadata, activities, times, stat_data = read_file(
+            filepath(f'output/{sample_file}/info.txt'))
 
-    # plot_pies(activities, times)
-    # plot_bars(activities, times)
+        # plot_pies(activities, times)
+        # plot_bars(activities, times)
 
-    flatten_times = _flatten(times)
-    flatten_labels = _flatten(activities)
+        flatten_times = _flatten(times)
+        flatten_labels = _flatten(activities)
 
-    act2time_tuples = list(zip(flatten_labels, flatten_times))
+        act2time_tuples = list(zip(flatten_labels, flatten_times))
 
-    plot_pies_all(act2time_tuples)
-    plot_bars_all(act2time_tuples)
+        # plot_pies_all(sample_name, act2time_tuples)
+        # plot_bars_all(sample_name, act2time_tuples)
+
+        metadata_lst[sample_name] = metadata
+        activities_lst[sample_name] = activities
+        times_lst[sample_name] = times
+        stat_data_lst[sample_name] = stat_data
+
+    # Plot line graph
+    chain_acts = {}
+    chain_times = {}
+    for k in activities_lst.keys():
+        if 'chain' in k:
+            chain_acts[k] = _flatten(activities_lst[k])
+            chain_times[k] = _flatten(times_lst[k])
+    plot_lines(chain_acts, chain_times)
+
+    plt.show()

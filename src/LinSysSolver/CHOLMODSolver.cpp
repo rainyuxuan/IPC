@@ -130,6 +130,8 @@ void CHOLMODSolver<vectorTypeI, vectorTypeS>::analyze_pattern(void)
 template <typename vectorTypeI, typename vectorTypeS>
 bool CHOLMODSolver<vectorTypeI, vectorTypeS>::factorize(void)
 {
+
+    outputA("/mnt/d/lyx20/Documents/LiuYuxuan/universite/Year4/csc494/cholmod-playground/inputs/A.txt");
     cholmod_factorize(A, L, &cm);
     // std::cout << getCurrentRSS() << std::endl;
     // exit(0);
@@ -188,6 +190,17 @@ void CHOLMODSolver<vectorTypeI, vectorTypeS>::outputFactorization(const std::str
     assert(out);
 
     cholmod_write_sparse(out, spm, NULL, "", &cm);
+
+    fclose(out);
+}
+
+template <typename vectorTypeI, typename vectorTypeS>
+void CHOLMODSolver<vectorTypeI, vectorTypeS>::outputA(const std::string& filePath)
+{
+    FILE* out = fopen(filePath.c_str(), "w");
+    assert(out);
+
+    cholmod_write_sparse(out, A, NULL, "", &cm);
 
     fclose(out);
 }

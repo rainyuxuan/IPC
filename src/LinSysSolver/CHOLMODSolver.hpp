@@ -53,6 +53,7 @@ public:
         Eigen::VectorXd& Ax) override;
 
     virtual void outputFactorization(const std::string& filePath) override;
+    void outputA(const std::string& filePath);
 };
 
 } // namespace IPC

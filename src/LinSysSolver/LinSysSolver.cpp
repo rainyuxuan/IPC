@@ -13,6 +13,7 @@ LinSysSolver<vectorTypeI, vectorTypeS>* LinSysSolver<vectorTypeI, vectorTypeS>::
     switch (type) {
 #ifdef IPC_WITH_CHOLMOD
     case LinSysSolverType::CHOLMOD:
+        spdlog::info("Using CHOLMOD");
         return new CHOLMODSolver<vectorTypeI, vectorTypeS>();
 #endif
 #ifdef IPC_WITH_AMGCL

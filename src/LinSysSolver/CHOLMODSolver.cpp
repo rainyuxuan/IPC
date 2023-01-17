@@ -9,8 +9,10 @@
 
 #include "CHOLMODSolver.hpp"
 #include "getRSS.hpp"
-
+#include <spdlog/spdlog.h>
 #include <iostream>
+#include <iomanip>
+#include <filesystem>
 
 namespace IPC {
 
@@ -64,7 +66,7 @@ void CHOLMODSolver<vectorTypeI, vectorTypeS>::set_pattern(const std::vector<std:
 {
     Base::set_pattern(vNeighbor, fixedVert);
 
-    //TODO: directly save into A
+    // TODO: directly save into A
     if (!A) {
         A = cholmod_allocate_sparse(Base::numRows, Base::numRows, Base::ja.size(),
             true, true, -1, CHOLMOD_REAL, &cm);
@@ -103,7 +105,7 @@ void CHOLMODSolver<vectorTypeI, vectorTypeS>::load(const char* filePath, Eigen::
 {
     Base::load(filePath, rhs);
 
-    //TODO: directly save into A
+    // TODO: directly save into A
     if (!A) {
         A = cholmod_allocate_sparse(Base::numRows, Base::numRows, Base::ja.size(),
             true, true, -1, CHOLMOD_REAL, &cm);
@@ -131,7 +133,8 @@ template <typename vectorTypeI, typename vectorTypeS>
 bool CHOLMODSolver<vectorTypeI, vectorTypeS>::factorize(void)
 {
 
-    outputA("/mnt/d/lyx20/Documents/LiuYuxuan/universite/Year4/csc494/cholmod-playground/inputs/A.txt");
+    //
+    //    outputA("/mnt/d/lyx20/Documents/LiuYuxuan/universite/Year4/csc494/cholmod-playground/inputs/");
     cholmod_factorize(A, L, &cm);
     // std::cout << getCurrentRSS() << std::endl;
     // exit(0);
@@ -142,7 +145,7 @@ template <typename vectorTypeI, typename vectorTypeS>
 void CHOLMODSolver<vectorTypeI, vectorTypeS>::solve(Eigen::VectorXd& rhs,
     Eigen::VectorXd& result)
 {
-    //TODO: directly point to rhs?
+    // TODO: directly point to rhs?
     if (!b) {
         b = cholmod_allocate_dense(Base::numRows, 1, Base::numRows, CHOLMOD_REAL, &cm);
         bx = b->x;
@@ -150,6 +153,9 @@ void CHOLMODSolver<vectorTypeI, vectorTypeS>::solve(Eigen::VectorXd& rhs,
     b->x = rhs.data();
     cholmod_dense* x;
     x = cholmod_solve(CHOLMOD_A, L, b, &cm);
+
+    outputSolve("/mnt/d/lyx20/Documents/LiuYuxuan/universite/Year4/csc494/cholmod-matrrces/inputs/", x);
+
     result.conservativeResize(rhs.size());
     memcpy(result.data(), x->x, result.size() * sizeof(result[0]));
     cholmod_free_dense(&x, &cm);
@@ -197,12 +203,45 @@ void CHOLMODSolver<vectorTypeI, vectorTypeS>::outputFactorization(const std::str
 template <typename vectorTypeI, typename vectorTypeS>
 void CHOLMODSolver<vectorTypeI, vectorTypeS>::outputA(const std::string& filePath)
 {
-    FILE* out = fopen(filePath.c_str(), "w");
-    assert(out);
+    if (A) {
+        FILE* aout = fopen((filePath + "A_sparse.txt").c_str(), "w");
+        assert(aout);
+        cholmod_write_sparse(aout, A, NULL, "", &cm);
+        fclose(aout);
+    }
 
-    cholmod_write_sparse(out, A, NULL, "", &cm);
+    if (b) {
+        FILE* bout = fopen((filePath + "b_dense.txt").c_str(), "w");
+        assert(bout);
+        cholmod_write_dense(bout, b, "", &cm);
+        fclose(bout);
+    }
+}
 
-    fclose(out);
+template <typename vectorTypeI, typename vectorTypeS>
+void CHOLMODSolver<vectorTypeI, vectorTypeS>::outputSolve(const std::string& filePath, cholmod_dense* x)
+{
+    // Generate an id by time
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+
+    std::ostringstream oss;
+    oss << std::put_time(&tm, "%y%m%d%H%M%S");
+    auto time_str = oss.str();
+
+    // Subdirectory by ID
+    std::string subdirPath = filePath + time_str + "/";
+    std::filesystem::create_directory(subdirPath);
+
+    spdlog::info("Save to Matrices to " + subdirPath);
+    // Output X
+    FILE* xout = fopen((subdirPath + "x_dense.txt").c_str(), "w");
+    assert(xout);
+    cholmod_write_dense(xout, x, "", &cm);
+    fclose(xout);
+
+    outputA(subdirPath);
+    outputFactorization(subdirPath + "L_sparse.txt");
 }
 
 template class CHOLMODSolver<Eigen::VectorXi, Eigen::VectorXd>;

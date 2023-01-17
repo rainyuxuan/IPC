@@ -54,6 +54,7 @@ public:
 
     virtual void outputFactorization(const std::string& filePath) override;
     void outputA(const std::string& filePath);
+    void outputSolve(const std::string& filePath, cholmod_dense* x);
 };
 
 } // namespace IPC

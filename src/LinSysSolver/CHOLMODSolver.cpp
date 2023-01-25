@@ -132,9 +132,6 @@ void CHOLMODSolver<vectorTypeI, vectorTypeS>::analyze_pattern(void)
 template <typename vectorTypeI, typename vectorTypeS>
 bool CHOLMODSolver<vectorTypeI, vectorTypeS>::factorize(void)
 {
-
-    //
-    //    outputA("/mnt/d/lyx20/Documents/LiuYuxuan/universite/Year4/csc494/cholmod-playground/inputs/");
     cholmod_factorize(A, L, &cm);
     // std::cout << getCurrentRSS() << std::endl;
     // exit(0);
@@ -154,7 +151,7 @@ void CHOLMODSolver<vectorTypeI, vectorTypeS>::solve(Eigen::VectorXd& rhs,
     cholmod_dense* x;
     x = cholmod_solve(CHOLMOD_A, L, b, &cm);
 
-    outputSolve("/mnt/d/lyx20/Documents/LiuYuxuan/universite/Year4/csc494/cholmod-matrrces/inputs/", x);
+    outputSolve("/mnt/d/lyx20/Documents/LiuYuxuan/universite/Year4/csc494/cholmod-matrices/inputs/", x);
 
     result.conservativeResize(rhs.size());
     memcpy(result.data(), x->x, result.size() * sizeof(result[0]));

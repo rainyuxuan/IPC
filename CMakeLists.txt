@@ -276,7 +276,8 @@ if(IPC_WITH_OSQP_MKL)
                PATHS $ENV{MKLROOT}/lib
                      $ENV{MKLROOT}/lib/intel64
                      $ENV{INTEL}/mkl/lib/intel64
-                     /opt/intel/mkl/lib)
+                     /opt/intel/mkl/lib
+                     /opt/intel/mkl/lib/intel64)
   if(MKL_RT_LIBRARY)
     message(STATUS "MKL found: enabling OSQP MKL Pardiso linear system solver")
     target_compile_definitions(${PROJECT_NAME}_dev PUBLIC OSQP_USE_MKL_PARDISO)

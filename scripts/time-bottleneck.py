@@ -11,8 +11,8 @@ INPUT_SAMPLES = {
     # 'tightFitCube1': 'ANSYS1e-3Corner_coarse_fixLowerHalf_NH_BE_interiorPoint_20221004004035t1',
     # 'tightFitCube8': 'ANSYS1e-3Corner_coarse_fixLowerHalf_NH_BE_interiorPoint_20221004003915t8',
     # 'tightFitCube12': 'ANSYS1e-3Corner_coarse_fixLowerHalf_NH_BE_interiorPoint_20221003234942t12',
-    'dolphin-100': 'dolphin5K_dragright_NH_BE_interiorPoint_20221006214650t12',
-    "matOnBoard-200": 'mat40x40-mat40x40_fall_NH_BE_interiorPoint_20221006223616t12',
+    # 'dolphin-100': 'dolphin5K_dragright_NH_BE_interiorPoint_20221006214650t12',
+    "matOnBoard-200": 'mat40x40-mat40x40_fall_NH_BE_interiorPoint_20230127145601t12',
 }
 
 
@@ -153,6 +153,20 @@ def plot_pies_all(input_name, act2time_tuples):
     """
     values = [t for a, t in act2time_tuples if t > 0]
     labels = [a for a, t in act2time_tuples if t > 0]
+
+    # Aggregate activities that is less than 5%
+    total_time = sum(values)
+    threshold = total_time * 0.03 or 0
+    other_time = sum([t for a, t in act2time_tuples if t < threshold])
+    exclude_indices = [i for i, t in enumerate(values) if t < threshold]
+
+    def filter_excluded(ls):
+        return list(map(lambda iv: iv[1], filter(lambda iv: iv[0] not in exclude_indices, enumerate(ls))))
+
+    values = filter_excluded(values)
+    labels = filter_excluded(labels)
+    values.append(other_time)
+    labels.append('Others')
 
     fig, ax = plt.subplots()
     ax.pie(values, labels=labels, autopct='%.2f%%', radius=1)

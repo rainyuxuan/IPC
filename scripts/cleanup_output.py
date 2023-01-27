@@ -30,6 +30,3 @@ if __name__ == '__main__':
                 if re.match(regex, file):
                     path = filepath(f'{directory}/{file}')
                     os.remove(path)
-
-        # for regex in REGEX_TO_CLEANUP:
-        #     print(glob.glob(filepath(f"{directory}/info*.txt")))

@@ -17,7 +17,7 @@ inputFolderPath = os.path.realpath('.') + '/input/'
 # on Minchen's Mac:
 # progPath = '/Users/mincli/Library/Developer/Xcode/DerivedData/IPC-cegibpdumtrmuqbjruacrqwltitb/Build/Products/Release/IPC'
 # on Ubuntu:
-progPath = os.path.realpath('.') + '/build/IPC_bin'
+progPath = os.path.realpath('.') + '/cmake-build-release/IPC_bin'
 # progPath = os.path.realpath('.') + '/src/Projects/DistortionMin/DistortionMin'
 
 # envSetStr = 'export LD_LIBRARY_PATH=/usr/local/lib\n'

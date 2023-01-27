@@ -4,13 +4,15 @@ import re
 import math
 
 INPUT_SAMPLES = {
-    'chain5': 'torus-torus-torus_fallNoShift_NH_BE_interiorPoint_20221004145812t12',
-    'chain10': 'torus-torus-torus_fallNoShift_NH_BE_interiorPoint_20221004145906t12',
-    'chain35': 'torus-torus-torus_fallNoShift_NH_BE_interiorPoint_20221003103857t12',
-    'chain100': 'torus-torus-torus_fallNoShift_NH_BE_interiorPoint_20221003232744t12',
-    'tightFitCube1': 'ANSYS1e-3Corner_coarse_fixLowerHalf_NH_BE_interiorPoint_20221004004035t1',
-    'tightFitCube8': 'ANSYS1e-3Corner_coarse_fixLowerHalf_NH_BE_interiorPoint_20221004003915t8',
-    'tightFitCube12': 'ANSYS1e-3Corner_coarse_fixLowerHalf_NH_BE_interiorPoint_20221003234942t12',
+    # 'chain5': 'torus-torus-torus_fallNoShift_NH_BE_interiorPoint_20221004145812t12',
+    # 'chain10': 'torus-torus-torus_fallNoShift_NH_BE_interiorPoint_20221004145906t12',
+    # 'chain35': 'torus-torus-torus_fallNoShift_NH_BE_interiorPoint_20221003103857t12',
+    # 'chain100': 'torus-torus-torus_fallNoShift_NH_BE_interiorPoint_20221003232744t12',
+    # 'tightFitCube1': 'ANSYS1e-3Corner_coarse_fixLowerHalf_NH_BE_interiorPoint_20221004004035t1',
+    # 'tightFitCube8': 'ANSYS1e-3Corner_coarse_fixLowerHalf_NH_BE_interiorPoint_20221004003915t8',
+    # 'tightFitCube12': 'ANSYS1e-3Corner_coarse_fixLowerHalf_NH_BE_interiorPoint_20221003234942t12',
+    'dolphin-100': 'dolphin5K_dragright_NH_BE_interiorPoint_20221006214650t12',
+    "matOnBoard-200": 'mat40x40-mat40x40_fall_NH_BE_interiorPoint_20221006223616t12',
 }
 
 
@@ -69,7 +71,7 @@ def read_file(filepath: str):
                 # One item in activity group
                 time = float(re.findall('\d+\.?\d*[eE]?-?\d*', line)[0].replace(' s', ''))
                 act = re.findall(': .+$', line)[0].replace(': ', '')
-                if act == "Total":
+                if act == "Total" or act == 'descent':
                     continue
                 curr_activities.append(act)
                 curr_times.append(time)
@@ -234,8 +236,8 @@ if __name__ == "__main__":
 
         act2time_tuples = list(zip(flatten_labels, flatten_times))
 
-        # plot_pies_all(sample_name, act2time_tuples)
-        # plot_bars_all(sample_name, act2time_tuples)
+        plot_pies_all(sample_name, act2time_tuples)
+        plot_bars_all(sample_name, act2time_tuples)
 
         metadata_lst[sample_name] = metadata
         activities_lst[sample_name] = activities
@@ -243,12 +245,12 @@ if __name__ == "__main__":
         stat_data_lst[sample_name] = stat_data
 
     # Plot line graph
-    chain_acts = {}
-    chain_times = {}
-    for k in activities_lst.keys():
-        if 'chain' in k:
-            chain_acts[k] = _flatten(activities_lst[k])
-            chain_times[k] = _flatten(times_lst[k])
-    plot_lines(chain_acts, chain_times)
+    # chain_acts = {}
+    # chain_times = {}
+    # for k in activities_lst.keys():
+    #     if 'chain' in k:
+    #         chain_acts[k] = _flatten(activities_lst[k])
+    #         chain_times[k] = _flatten(times_lst[k])
+    # plot_lines(chain_acts, chain_times)
 
     plt.show()

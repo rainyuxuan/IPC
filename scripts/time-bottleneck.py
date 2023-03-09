@@ -11,8 +11,8 @@ INPUT_SAMPLES = {
     # 'tightFitCube1': 'ANSYS1e-3Corner_coarse_fixLowerHalf_NH_BE_interiorPoint_20221004004035t1',
     # 'tightFitCube8': 'ANSYS1e-3Corner_coarse_fixLowerHalf_NH_BE_interiorPoint_20221004003915t8',
     # 'tightFitCube12': 'ANSYS1e-3Corner_coarse_fixLowerHalf_NH_BE_interiorPoint_20221003234942t12',
-    # 'dolphin-100': 'dolphin5K_dragright_NH_BE_interiorPoint_20221006214650t12',
-    "matOnBoard-200": 'mat40x40-mat40x40_fall_NH_BE_interiorPoint_20230127145601t12',
+    'dolphin-100': 'dolphin5K_dragright_NH_BE_interiorPoint_20230131115316t12',
+    # "matOnBoard-200": 'mat40x40-mat40x40_fall_NH_BE_interiorPoint_20230127145601t12',
 }
 
 

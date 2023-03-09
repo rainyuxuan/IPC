@@ -34,8 +34,10 @@ project(IPC DESCRIPTION "Incremental Potential Contact (IPC)" LANGUAGES CXX)
 option(IPC_WITH_OPENGL "Use libgil viewer for preview and output" ON)
 option(IPC_WITH_AMGCL "Enable AMGCL linear system solver" ON)
 option(IPC_WITH_CHOLMOD "Enable CHOLMOD linear system solver" ON)
-set(IPC_DEFAULT_LINSYSSOLVER "CHOLMOD" CACHE STRING "Linear system solver to use (options: CHOLMOD, AMGCL, EIGEN)")
-set_property(CACHE IPC_DEFAULT_LINSYSSOLVER PROPERTY STRINGS "CHOLMOD" "AMGCL" "EIGEN")
+option(IPC_WITH_MKL "Enable MKL Pardiso linear system solver" ON)
+#set(IPC_DEFAULT_LINSYSSOLVER "CHOLMOD" CACHE STRING "Linear system solver to use (options: CHOLMOD, AMGCL, EIGEN)")
+set(IPC_DEFAULT_LINSYSSOLVER "MKL" CACHE STRING "Linear system solver to use (options: CHOLMOD, AMGCL, EIGEN, MKL)")
+set_property(CACHE IPC_DEFAULT_LINSYSSOLVER PROPERTY STRINGS "MKL" "CHOLMOD" "AMGCL" "EIGEN")
 ## SQP and QP options
 option(IPC_WITH_GUROBI       "Enable Gurobi QP solver for SQP method"             OFF)
 option(IPC_WITH_OSQP_MKL     "Use MKL Pardiso linear solver in OSQP if available"  ON)
@@ -118,6 +120,12 @@ endif()
 # OSQP
 include(osqp)
 target_link_libraries(${PROJECT_NAME}_dev PUBLIC osqp::osqp)
+
+# MKL Pardiso
+if(IPC_WITH_MKL)
+  find_package(MKL REQUIRED)
+  target_link_libraries(${PROJECT_NAME}_dev PUBLIC MKL::MKL)
+endif()
 
 # libigl
 include(eigen)
@@ -287,6 +295,9 @@ if(IPC_WITH_OSQP_MKL)
 endif()
 
 # Set the selected linear system solver
+if(IPC_DEFAULT_LINSYSSOLVER STREQUAL "MKL" AND NOT IPC_WITH_MKL)
+  message(FATAL_ERROR "MKL selected as IPC_DEFAULT_LINSYSSOLVER, but MKL is disabled (IPC_WITH_MKL=OFF)!")
+endif()
 if(IPC_DEFAULT_LINSYSSOLVER STREQUAL "CHOLMOD" AND NOT IPC_WITH_CHOLMOD)
   message(FATAL_ERROR "CHOLMOD selected as IPC_DEFAULT_LINSYSSOLVER, but CHOLMOD is disabled (IPC_WITH_CHOLMOD=OFF)!")
 endif()
@@ -301,6 +312,9 @@ if(IPC_WITH_AMGCL)
 endif()
 if(IPC_WITH_CHOLMOD)
   target_compile_definitions(${PROJECT_NAME}_dev PUBLIC IPC_WITH_CHOLMOD)
+endif()
+if(IPC_WITH_MKL)
+  target_compile_definitions(${PROJECT_NAME}_dev PUBLIC IPC_WITH_MKL)
 endif()
 
 # Quiet the viewer

@@ -2,6 +2,7 @@
 #include "AMGCLSolver.hpp"
 #include "CHOLMODSolver.hpp"
 #include "EigenLibSolver.hpp"
+#include "MKLSolver.hpp"
 
 #include <spdlog/spdlog.h>
 
@@ -11,6 +12,10 @@ template <typename vectorTypeI, typename vectorTypeS>
 LinSysSolver<vectorTypeI, vectorTypeS>* LinSysSolver<vectorTypeI, vectorTypeS>::create(const LinSysSolverType type)
 {
     switch (type) {
+#ifdef IPC_WITH_MKL
+    case LinSysSolverType::MKL:
+        return new MKLSolver<vectorTypeI, vectorTypeS>();
+#endif
 #ifdef IPC_WITH_CHOLMOD
     case LinSysSolverType::CHOLMOD:
         return new CHOLMODSolver<vectorTypeI, vectorTypeS>();

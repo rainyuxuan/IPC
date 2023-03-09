@@ -23,6 +23,7 @@
 namespace IPC {
 
 enum class LinSysSolverType {
+    MKL,
     CHOLMOD,
     AMGCL,
     EIGEN
@@ -35,6 +36,16 @@ protected:
     Eigen::VectorXi ia, ja;
     std::vector<std::map<int, int>> IJ2aI;
     Eigen::VectorXd a;
+
+    // Timing
+    double load_time = 0.0;
+    double total_load_time = 0.0;
+    double solve_time = 0.0;
+    double total_solve_time = 0.0;
+    double analyze_time = 0.0;
+    double total_analyze_time = 0.0;
+    double factor_time = 0.0;
+    double total_factor_time = 0.0;
 
 public:
     virtual ~LinSysSolver(void){};

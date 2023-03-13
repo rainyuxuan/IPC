@@ -122,10 +122,22 @@ include(osqp)
 target_link_libraries(${PROJECT_NAME}_dev PUBLIC osqp::osqp)
 
 # MKL Pardiso
-if(IPC_WITH_MKL)
-  find_package(MKL REQUIRED)
-  target_link_libraries(${PROJECT_NAME}_dev PUBLIC MKL::MKL)
-endif()
+if (IPC_WITH_MKL)
+  ### Find Intel MKL if available
+  find_package(MKL OPTIONAL_COMPONENTS)
+  if (EXISTS "${MKL_INCLUDE_DIRS}")
+    message(STATUS "Intel MKL has been found")
+  else ()
+    message(STATUS "Intel MKL not found.")
+    set(MKL_LIBRARIES "")
+    set(MKL 0)
+  endif ()
+
+  target_include_directories(${PROJECT_NAME}_dev PUBLIC "${MKL_INCLUDE_DIRS}")
+  target_link_libraries(${PROJECT_NAME}_dev PUBLIC
+          ${MKL_LIBRARIES})
+  add_compile_options(-m64 -W)
+endif ()
 
 # libigl
 include(eigen)

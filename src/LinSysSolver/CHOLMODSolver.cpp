@@ -65,9 +65,11 @@ void CHOLMODSolver<vectorTypeI, vectorTypeS>::set_pattern(const std::vector<std:
     Base::set_pattern(vNeighbor, fixedVert);
 
     //TODO: directly save into A
+    Base::load_time = omp_get_wtime();
     if (!A) {
         A = cholmod_allocate_sparse(Base::numRows, Base::numRows, Base::ja.size(),
             true, true, -1, CHOLMOD_REAL, &cm);
+
         Ax = A->x;
         Ap = A->p;
         Ai = A->i;
@@ -78,12 +80,15 @@ void CHOLMODSolver<vectorTypeI, vectorTypeS>::set_pattern(const std::vector<std:
     A->i = Base::ja.data();
     A->p = Base::ia.data();
     A->x = Base::a.data();
+    Base::load_time = omp_get_wtime() - Base::load_time;
+    Base::total_load_time += Base::load_time;
 }
 template <typename vectorTypeI, typename vectorTypeS>
 void CHOLMODSolver<vectorTypeI, vectorTypeS>::set_pattern(const Eigen::SparseMatrix<double>& mtr)
 {
     Base::set_pattern(mtr);
 
+    Base::load_time = omp_get_wtime();
     if (!A) {
         A = cholmod_allocate_sparse(Base::numRows, Base::numRows, mtr.nonZeros(),
             true, true, -1, CHOLMOD_REAL, &cm);
@@ -96,6 +101,8 @@ void CHOLMODSolver<vectorTypeI, vectorTypeS>::set_pattern(const Eigen::SparseMat
         A->p = Base::ia.data();
         A->x = Base::a.data();
     }
+    Base::load_time = omp_get_wtime() - Base::load_time;
+    Base::total_load_time += Base::load_time;
 }
 
 template <typename vectorTypeI, typename vectorTypeS>
@@ -104,9 +111,12 @@ void CHOLMODSolver<vectorTypeI, vectorTypeS>::load(const char* filePath, Eigen::
     Base::load(filePath, rhs);
 
     //TODO: directly save into A
+    Base::load_time = omp_get_wtime();
     if (!A) {
         A = cholmod_allocate_sparse(Base::numRows, Base::numRows, Base::ja.size(),
             true, true, -1, CHOLMOD_REAL, &cm);
+
+
         Ax = A->x;
         Ap = A->p;
         Ai = A->i;
@@ -117,6 +127,8 @@ void CHOLMODSolver<vectorTypeI, vectorTypeS>::load(const char* filePath, Eigen::
     A->i = Base::ja.data();
     A->p = Base::ia.data();
     A->x = Base::a.data();
+    Base::load_time = omp_get_wtime() - Base::load_time;
+    Base::total_load_time += Base::load_time;
 }
 
 template <typename vectorTypeI, typename vectorTypeS>
@@ -124,13 +136,20 @@ void CHOLMODSolver<vectorTypeI, vectorTypeS>::analyze_pattern(void)
 {
     // std::cout << getCurrentRSS() << std::endl;
     cholmod_free_factor(&L, &cm);
+
+    Base::analyze_time = omp_get_wtime();
     L = cholmod_analyze(A, &cm);
+    Base::analyze_time = omp_get_wtime() - Base::analyze_time;
+    Base::total_analyze_time += Base::analyze_time;
 }
 
 template <typename vectorTypeI, typename vectorTypeS>
 bool CHOLMODSolver<vectorTypeI, vectorTypeS>::factorize(void)
 {
+    Base::factor_time = omp_get_wtime();
     cholmod_factorize(A, L, &cm);
+    Base::factor_time = omp_get_wtime() - Base::factor_time;
+    Base::total_factor_time += Base::factor_time;
     // std::cout << getCurrentRSS() << std::endl;
     // exit(0);
     return cm.status != CHOLMOD_NOT_POSDEF;
@@ -147,7 +166,12 @@ void CHOLMODSolver<vectorTypeI, vectorTypeS>::solve(Eigen::VectorXd& rhs,
     }
     b->x = rhs.data();
     cholmod_dense* x;
+
+    Base::solve_time = omp_get_wtime();
     x = cholmod_solve(CHOLMOD_A, L, b, &cm);
+    Base::solve_time = omp_get_wtime() - Base::solve_time;
+    Base::total_solve_time += Base::solve_time;
+
     result.conservativeResize(rhs.size());
     memcpy(result.data(), x->x, result.size() * sizeof(result[0]));
     cholmod_free_dense(&x, &cm);

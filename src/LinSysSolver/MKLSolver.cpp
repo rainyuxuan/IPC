@@ -102,7 +102,6 @@ void MKLSolver<vectorTypeI, vectorTypeS>::set_pattern(const Eigen::SparseMatrix<
 template <typename vectorTypeI, typename vectorTypeS>
 void MKLSolver<vectorTypeI, vectorTypeS>::analyze_pattern(void)
 {
-    std::cout << "++++++++++++++++++ MKL: Analysing *********************" << std::endl;
     phase = -1;
     PARDISO(pt, &maxfct, &mnum, &mtype, &phase,
         &N, Ax, Ap, Ai, NULL,
@@ -122,7 +121,6 @@ void MKLSolver<vectorTypeI, vectorTypeS>::analyze_pattern(void)
 template <typename vectorTypeI, typename vectorTypeS>
 bool MKLSolver<vectorTypeI, vectorTypeS>::factorize(void)
 {
-    std::cout << "++++++++++++++++++ MKL: Factorizing *********************" << std::endl;
     updateMKL(); // TODO: REMOVE AFTER DEBUGGING
     Base::factor_time = omp_get_wtime();
     phase = 0;
@@ -147,7 +145,6 @@ template <typename vectorTypeI, typename vectorTypeS>
 void MKLSolver<vectorTypeI, vectorTypeS>::solve(Eigen::VectorXd& rhs,
     Eigen::VectorXd& result)
 {
-    std::cout << "++++++++++++++++++ MKL: Solve *********************" << std::endl;
     /* -------------------------------------------------------------------- */
     /* .. Back substitution and iterative refinement. */
     /* -------------------------------------------------------------------- */

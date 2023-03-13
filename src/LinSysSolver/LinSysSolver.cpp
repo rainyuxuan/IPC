@@ -14,10 +14,12 @@ LinSysSolver<vectorTypeI, vectorTypeS>* LinSysSolver<vectorTypeI, vectorTypeS>::
     switch (type) {
 #ifdef IPC_WITH_MKL
     case LinSysSolverType::MKL:
+        spdlog::info("Using MKL solver");
         return new MKLSolver<vectorTypeI, vectorTypeS>();
 #endif
 #ifdef IPC_WITH_CHOLMOD
     case LinSysSolverType::CHOLMOD:
+        spdlog::info("Using CHOLMOD solver");
         return new CHOLMODSolver<vectorTypeI, vectorTypeS>();
 #endif
 #ifdef IPC_WITH_AMGCL

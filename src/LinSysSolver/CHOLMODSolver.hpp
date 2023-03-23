@@ -48,13 +48,15 @@ public:
 
     void solve(Eigen::VectorXd& rhs,
         Eigen::VectorXd& result) override;
+    void solve(Eigen::VectorXd& rhs,
+        Eigen::VectorXd& result, const std::string& outputPath) override;
 
     virtual void multiply(const Eigen::VectorXd& x,
         Eigen::VectorXd& Ax) override;
 
     virtual void outputFactorization(const std::string& filePath) override;
-    void outputA(const std::string& filePath);
-    void outputSolve(const std::string& filePath, cholmod_dense* x);
+    void outputA(const std::string& filePath) override;
+    void outputSolve(const std::string& filePath) override;
 };
 
 } // namespace IPC

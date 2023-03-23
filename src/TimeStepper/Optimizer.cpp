@@ -37,6 +37,7 @@
 #include <stdexcept>
 
 #include <sys/stat.h> // for mkdir
+#include <filesystem>
 
 // #define SAVE_EXTREME_LINESEARCH_CCD
 
@@ -74,6 +75,24 @@ Optimizer<dim>::Optimizer(const Mesh<dim>& p_data0,
     const Config& p_animConfig)
     : data0(p_data0), energyTerms(p_energyTerms), energyParams(p_energyParams), animConfig(p_animConfig), OSQPSolver(false)
 {
+
+    //////////////////// Set file name ////////////////////////
+    // Generate an id by time
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+
+    std::ostringstream oss;
+    oss << std::put_time(&tm, "%y%m%d%H%M%S");
+    auto time_str = oss.str();
+
+    // Subdirectory by ID
+    matrixOutputPath = "/home/liu/Documents/dev/cholmod-matrices/inputs-pcg/" + time_str + "/";
+    std::filesystem::create_directory(matrixOutputPath);
+    std::filesystem::create_directory(matrixOutputPath + "computeSearchDir/");
+    std::filesystem::create_directory(matrixOutputPath + "fullyImplicit_IP/");
+    std::filesystem::create_directory(matrixOutputPath + "solve_oneStep/");
+    ///////////////////////////////////////////////////////////
+
     assert(energyTerms.size() == energyParams.size());
 
     gradient_ET.resize(energyTerms.size());
@@ -1725,7 +1744,7 @@ bool Optimizer<dim>::fullyImplicit_IP(void)
                     }
                     else {
                         Eigen::VectorXd minusG = -gradient;
-                        linSysSolver->solve(minusG, searchDir);
+                        linSysSolver->solve(minusG, searchDir, matrixOutputPath + "fullyImplicit_IP/" + getIterPath());
                     }
 
                     if (searchDir.cwiseAbs().maxCoeff() < targetGRes) {
@@ -2349,7 +2368,7 @@ void Optimizer<dim>::computeSearchDir(int k, bool projectDBC)
     else {
         // solve for searchDir
         timer_step.start(4);
-        linSysSolver->solve(minusG, searchDir);
+        linSysSolver->solve(minusG, searchDir, matrixOutputPath + "computeSearchDir/" + getIterPath());
         timer_step.stop();
     }
 }
@@ -2581,7 +2600,7 @@ bool Optimizer<dim>::solve_oneStep(void)
     }
     else {
         Eigen::VectorXd minusG = -gradient;
-        linSysSolver->solve(minusG, searchDir);
+        linSysSolver->solve(minusG, searchDir, matrixOutputPath + "solve_oneStep/" + getIterPath());
     }
     if (!mute) { timer_step.stop(); }
 

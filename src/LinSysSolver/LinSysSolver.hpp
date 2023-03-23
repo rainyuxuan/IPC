@@ -235,6 +235,9 @@ public:
         Eigen::VectorXd& result)
         = 0;
 
+    virtual void solve(Eigen::VectorXd& rhs,
+    Eigen::VectorXd& result, const std::string& outputPath){};
+
     virtual void multiply(const Eigen::VectorXd& x,
         Eigen::VectorXd& Ax)
     {
@@ -254,6 +257,14 @@ public:
 
 public:
     virtual void outputFactorization(const std::string& filePath)
+    {
+        assert(0 && "please implement!");
+    }
+    virtual void outputSolve(const std::string& filePath)
+    {
+        assert(0 && "please implement!");
+    }
+    virtual void outputA(const std::string& filePath)
     {
         assert(0 && "please implement!");
     }

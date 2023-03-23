@@ -32,6 +32,8 @@ public:
 
     friend class Mesh<dim>;
 
+    std::string matrixOutputPath;
+
 protected: // referenced data
     const Mesh<dim>& data0; // initial guess
     const std::vector<Energy<dim>*>& energyTerms; // E_0, E_1, E_2, ...
@@ -280,6 +282,10 @@ protected: // helper functions
         std::vector<Eigen::Matrix<double, 1, dim>>& sysL);
 
     virtual void initStepSize(const Mesh<dim>& data, double& stepSize);
+
+    std::string getIterPath(){
+        return std::to_string(globalIterNum) + "_" + std::to_string(innerIterAmt) + "/";
+    }
 };
 
 } // namespace IPC

@@ -86,7 +86,7 @@ Optimizer<dim>::Optimizer(const Mesh<dim>& p_data0,
     auto time_str = oss.str();
 
     // Subdirectory by ID
-    matrixOutputPath = "/home/liu/Documents/dev/cholmod-matrices/inputs-pcg/" + time_str + "/";
+    matrixOutputPath = "/home/liu/Documents/dev/cholmod-matrices/pcg/inputs/" + time_str + "/";
     std::filesystem::create_directory(matrixOutputPath);
     std::filesystem::create_directory(matrixOutputPath + "computeSearchDir/");
     std::filesystem::create_directory(matrixOutputPath + "fullyImplicit_IP/");

@@ -36,7 +36,7 @@ option(IPC_WITH_AMGCL "Enable AMGCL linear system solver" ON)
 option(IPC_WITH_CHOLMOD "Enable CHOLMOD linear system solver" ON)
 option(IPC_WITH_MKL "Enable MKL Pardiso linear system solver" ON)
 #set(IPC_DEFAULT_LINSYSSOLVER "CHOLMOD" CACHE STRING "Linear system solver to use (options: CHOLMOD, AMGCL, EIGEN)")
-set(IPC_DEFAULT_LINSYSSOLVER "CHOLMOD" CACHE STRING "Linear system solver to use (options: CHOLMOD, AMGCL, EIGEN, MKL)")
+set(IPC_DEFAULT_LINSYSSOLVER "MKL" CACHE STRING "Linear system solver to use (options: CHOLMOD, AMGCL, EIGEN, MKL)")
 set_property(CACHE IPC_DEFAULT_LINSYSSOLVER PROPERTY STRINGS "CHOLMOD" "MKL" "AMGCL" "EIGEN")
 ## SQP and QP options
 option(IPC_WITH_GUROBI       "Enable Gurobi QP solver for SQP method"             OFF)
